@@ -32,7 +32,7 @@ Functia RandomForest::predict va apela Node::predict pentru fiecare arbore de de
 
 Functia get_random_samples va intoarce o submatrice din setul initial de date, cu num_to_return linii generate aleator, fiind unice intre ele.
 
-Functia find_best_split intoarce o pereche (splitIndex, splitValue) care va reprezenta cel mai bun split. Pentru fiecare samples[i] se va calcula cel mai mare Information Gain, calculand entropia pentru parinte si copilul stang, respectiv drept.
+Functia find_best_split intoarce o pereche (splitIndex, splitValue) care va reprezenta cel mai bun split. Pentru fiecare samples[i] se va calcula cel mai mare Information Gain, calculand entropia pentru parinte si copilul stang, respectiv drept. Pentru optimizare s-a ales o medie a valorilor.
 
 Functia train verifica daca nodurile din samples au aceeasi clasa si transforma nodul curent in frunza. In caz contrar, daca nu se va gasi un split bun, nodul curent devine frunza. Altfel se va lua cel mai bun split si se va continua apelarea recursiva a functiei pentru copilul stang, respectiv drept.
 

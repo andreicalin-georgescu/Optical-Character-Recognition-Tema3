@@ -69,27 +69,31 @@ pair<int, int> find_best_split(const vector<vector<int>> &samples,
     int splitIndex = -1, splitValue = -1;
     float max = -1;
     float ig = 0;
-    for (int i = 1; i < samples[0].size(); ++i){
-        float H_parent = get_entropy_by_indexes(samples,
+    float H_parent = get_entropy_by_indexes(samples,
                             dimensions);
+    for (int i = 1; i < samples[0].size(); ++i){
         unique = compute_unique(samples, i);
+        float avg, sum = 0, k = 0;
         for (int j = 0; j < unique.size(); ++j){
             if (unique[j] < 5 || unique[j] > 250){
-                children = get_split_as_indexes(samples, i, unique[j]);
-                float H_left = get_entropy_by_indexes(samples, children.first);
-                float H_right = get_entropy_by_indexes
-                                (samples, children.second);
-                ig = H_parent - (children.first.size() * H_left +
-                                children.second.size()
-                                * H_right)
-                                /(children.first.size() +
-                                children.second.size());
-                if (ig > max){
-                    max = ig;
-                    splitIndex = i;
-                    splitValue = unique[j];
-                }
+                sum += unique[j];
+                k++;
             }
+        }
+        avg = sum / k;
+        children = get_split_as_indexes(samples, i, avg);
+        float H_left = get_entropy_by_indexes(samples, children.first);
+        float H_right = get_entropy_by_indexes
+                        (samples, children.second);
+        ig = H_parent - (children.first.size() * H_left +
+                        children.second.size()
+                        * H_right)
+                        /(children.first.size() +
+                        children.second.size());
+        if (ig > max){
+            max = ig;
+            splitIndex = i;
+            splitValue = avg;
         }
     }
     return pair<int, int>(splitIndex, splitValue);
