@@ -39,6 +39,21 @@ void Node::make_leaf(const vector<vector<int>> &samples,
     // Seteaza nodul ca fiind de tip frunza (modificati is_leaf si result)
     // is_single_class = true -> toate testele au aceeasi clasa (acela e result)
     // is_single_class = false -> se alege clasa care apare cel mai des
+    this->is_leaf = true;
+    if (is_single_class == false){
+        vector <int> frequency(10, 0);
+        int max = 0, index;
+        for (int i = 0; i < samples.size(); ++i){
+            frequency[samples[i][0]]++;
+            if (frequency[samples[i][0]] > max){
+                max = frequency[samples[i][0]];
+                index = i;
+            }
+        }
+        this->result = samples[index][0];
+    } else {
+        this->result = samples[0][0];
+    }
 }
 
 
@@ -49,7 +64,34 @@ pair<int, int> find_best_split(const vector<vector<int>> &samples,
     // primite. Prin cel mai bun split (dimensiune si valoare)
     // ne referim la split-ul care maximizeaza IG
     // pair-ul intors este format din (split_index, split_value)
+    pair<vector<int>, vector<int>> children;
+    vector<int> unique;
     int splitIndex = -1, splitValue = -1;
+    float max = -1;
+    float ig = 0;
+    for (int i = 1; i < samples[0].size(); ++i){
+        float H_parent = get_entropy_by_indexes(samples,
+                            dimensions);
+        unique = compute_unique(samples, i);
+        for (int j = 0; j < unique.size(); ++j){
+            if (unique[j] < 5 || unique[j] > 250){
+                children = get_split_as_indexes(samples, i, unique[j]);
+                float H_left = get_entropy_by_indexes(samples, children.first);
+                float H_right = get_entropy_by_indexes
+                                (samples, children.second);
+                ig = H_parent - (children.first.size() * H_left +
+                                children.second.size()
+                                * H_right)
+                                /(children.first.size() +
+                                children.second.size());
+                if (ig > max){
+                    max = ig;
+                    splitIndex = i;
+                    splitValue = unique[j];
+                }
+            }
+        }
+    }
     return pair<int, int>(splitIndex, splitValue);
 }
 
@@ -60,12 +102,45 @@ void Node::train(const vector<vector<int>> &samples) {
     // Daca da, acest nod devine frunza, altfel continua algoritmul.
     // 2) Daca nu exista niciun split valid, acest nod devine frunza. Altfel,
     // ia cel mai bun split si continua recursiv
+    pair <int, int> decision;
+    pair <vector <vector<int>>, vector <vector<int>>> subsets;
+    if (same_class(samples) == true){
+        make_leaf(samples, true);
+    } else{
+        decision = find_best_split(samples,
+                    random_dimensions(samples.size()));
+        if (decision.first == -1 && decision.second == -1){
+            make_leaf(samples, false);
+        } else{
+            int new_index = decision.first;
+            int new_value = decision.second;
+            make_decision_node(new_index, new_value);
+            subsets = split(samples, new_index, new_value);
+            if (left == nullptr){
+                left = make_shared <Node>(Node());
+            }
+            if (right == nullptr){
+                right = make_shared <Node>(Node());
+            }
+            left->train(subsets.first);
+            right->train(subsets.second);
+        }
+    }
 }
 
 int Node::predict(const vector<int> &image) const {
     // TODO(you)
     // Intoarce rezultatul prezis de catre decision tree
-    return 0;
+    if (this->is_leaf == true){
+        return this->result;
+    } else{
+        if (image[split_index - 1] > split_value){
+            this->right->predict(image);
+        } else{
+            this->left->predict(image);
+        }
+    }
+    // return 0;
 }
 
 bool same_class(const vector<vector<int>> &samples) {
@@ -100,7 +175,19 @@ float get_entropy_by_indexes(const vector<vector<int>> &samples,
     // Intoarce entropia subsetului din setul de teste total(samples)
     // Cu conditia ca subsetul sa contina testele ale caror indecsi se gasesc in
     // vectorul index (Se considera doar liniile din vectorul index)
-    return 0;
+    vector<float> freq(10, 0);
+    float entropy = 0.0f;
+    for (int i = 0; i < index.size(); ++i){
+        freq[samples[index[i]][0]]++;
+    }
+    for (int i = 0; i < freq.size(); ++i){
+        float tmp;
+        tmp = 1.0 * freq[i]/index.size();
+        if (tmp != 0){
+            entropy -= tmp * log2(tmp);
+        }
+    }
+    return entropy;
 }
 
 vector<int> compute_unique(const vector<vector<int>> &samples, const int col) {

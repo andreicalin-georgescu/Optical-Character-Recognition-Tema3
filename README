@@ -1,12 +1,41 @@
 OPTICAL - CHARACTER - RECOGNITION
 
+link tema: https://ocw.cs.pub.ro/courses/sd-ca/teme/tema3-2018
+
 Aceasta este implementarea noastra pentru Tema3 la Structuri de Date.
-Structura fisierelor:
-/headers contine headerele folosite in implementarea temei
-main.cpp fisierul main
 
 Tema a fost implementata de :
 	Georgescu Andrei Calin 314CA
 	Necula Horatiu 314CA
 
-TODO explicatii
+Explicatii:
+
+Pentru implementarea algoritmului ne-am folosit de explicatiile prezentate in enuntul temei.
+
+Functia make_leaf seteaza nodul ca fiind frunza in arbore, tinand cont daca celelalte au sau nu aceeasi clasa. 
+In cazul in care nu exista peste tot aceeasi clasa folosim un vector de frecventa pentru a determina cifra care
+apare cel mai des.
+
+Functia same_class verifica prima pozitie din cadrul fiecarui vector pentru a determina daca au toate aceeasi clasa.
+
+Functia get_entropy_by_indexes calculeaza entropia unui subset de date pentru fiecare element din vectorul index.
+
+Functia compute_unique va verifica si salva doar valorile unice dintr-un set de date. Inainte de fiecare noua adaugare se va verfica vectorul uniqueValues ca valoarea sa nu fi fost deja adaugata.
+
+Functia get_split_as_indexes va returna doi vectori care contin indecsii din vectorul samples in functie de split_index si split_value. Se va verifica fiecare samples[i][split_index], cu i din samples, comparand cu split_Value.
+
+Functia random_dimensions va selecta floor(sqrt(size)) dimensiuni. Verificam ca dimensiunile sa fie unice si nenule, folosind un principiu similar ca la functia compute_unique.
+
+Functia Node::predict verifica daca nodul in care ne aflam este frunza (si intoarce result in caz afirmativ), altfel, prin apel recursiv, se va parcurge subarborele stang sau drept, in functie de split_value.
+
+Functia RandomForest::predict va apela Node::predict pentru fiecare arbore de decizie din Forest, calculeaza raspunsul prezis si il intoarce pe cel mai frecvent.
+
+Functia get_random_samples va intoarce o submatrice din setul initial de date, cu num_to_return linii generate aleator, fiind unice intre ele.
+
+Functia find_best_split intoarce o pereche (splitIndex, splitValue) care va reprezenta cel mai bun split. Pentru fiecare samples[i] se va calcula cel mai mare Information Gain, calculand entropia pentru parinte si copilul stang, respectiv drept.
+
+Functia train verifica daca nodurile din samples au aceeasi clasa si transforma nodul curent in frunza. In caz contrar, daca nu se va gasi un split bun, nodul curent devine frunza. Altfel se va lua cel mai bun split si se va continua apelarea recursiva a functiei pentru copilul stang, respectiv drept.
+
+Functiile same_class, compute_unique, get_split_as_indexes, random_dimensions si get_random_samples au fost implementate de fiecare dintre noi, individual. Celelalte (find_best_split, train, predict, etc.) au fost implementate impreuna in timpul sesiunilor de Skype. Partea de debugging a fost realizata, de asemenea, impreuna.
+
+Am lucrat folosind un repository privat de github. Pentru accesare va rugam sa contactati pe unul dintre noi pentru a va da acces.
