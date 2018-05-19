@@ -38,8 +38,9 @@ void Node::make_leaf(const vector<vector<int>> &samples,
     // TODO(you)
     // Seteaza nodul ca fiind de tip frunza (modificati is_leaf si result)
     // is_single_class = true -> toate testele au aceeasi clasa (acela e result)
-    // is_single_class = false -> se alege clasa care apare cel mai de
+    // is_single_class = false -> se alege clasa care apare cel mai des
 }
+
 
 pair<int, int> find_best_split(const vector<vector<int>> &samples,
                                const vector<int> &dimensions) {
@@ -48,8 +49,7 @@ pair<int, int> find_best_split(const vector<vector<int>> &samples,
     // primite. Prin cel mai bun split (dimensiune si valoare)
     // ne referim la split-ul care maximizeaza IG
     // pair-ul intors este format din (split_index, split_value)
-    int splitIndex = -1;
-    int splitValue = -1;
+    int splitIndex = -1, splitValue = -1;
     return pair<int, int>(splitIndex, splitValue);
 }
 
@@ -73,9 +73,10 @@ bool same_class(const vector<vector<int>> &samples) {
     // Verifica daca testele primite ca argument au toate aceeasi
     // clasa(rezultat). Este folosit in train pentru a determina daca
     // mai are rost sa caute split-uri
-    int test = samples[0].front();
-    for (int i = 0; i < samples.size(); i++) {
-        if (test != samples[i].front()) {
+
+    int aux = samples[0][0];
+    for (int i = 1; i < samples.size(); ++i){
+        if ( samples[i][0] != aux ){
             return false;
         }
     }
@@ -107,10 +108,15 @@ vector<int> compute_unique(const vector<vector<int>> &samples, const int col) {
     // Intoarce toate valorile (se elimina duplicatele)
     // care apar in setul de teste, pe coloana col
     vector<int> uniqueValues;
-    for (int i = 0; i < samples.size(); i++) {
-        bool exist = std::find(std::begin(uniqueValues), std::end(uniqueValues),
-            samples[i][col]) != std::end(uniqueValues);
-        if (!exist) {
+    for (int i = 0; i < samples.size(); ++i){
+        int ok = 1;
+        for (int j = 0; j < uniqueValues.size(); ++j){
+            if (samples[i][col] == uniqueValues[j]){
+                ok = 0;
+                break;
+            }
+        }
+        if (ok == 1){
             uniqueValues.push_back(samples[i][col]);
         }
     }
@@ -138,10 +144,10 @@ pair<vector<int>, vector<int>> get_split_as_indexes(
     // Intoarce indecsii sample-urilor din cele 2 subseturi obtinute in urma
     // separarii in functie de split_index si split_value
     vector<int> left, right;
-    for (int i = 0; i < samples.size(); i++) {
-        if (samples[i][split_index] <= split_value) {
+    for (int i = 0; i < samples.size(); ++i){
+        if (samples[i][split_index] <= split_value){
             left.push_back(i);
-        } else {
+        } else{
             right.push_back(i);
         }
     }
@@ -152,16 +158,21 @@ vector<int> random_dimensions(const int size) {
     // TODO(you)
     // Intoarce sqrt(size) dimensiuni diferite pe care sa caute splitul maxim
     // Precizare: Dimensiunile gasite sunt > 0 si < size
+    int nr = floor(sqrt(size));
+    int min = 1;
+    int max = size - 1;
     vector<int> rez;
-    int numbers = floor(sqrt(size));
-    int counter = 0;
-    while (counter < numbers){
-        int random_nr = 1 + (std::rand() % (int)(size - 1));
-        bool exist = std::find(std::begin(rez), std::end(rez),
-            random_nr) != std::end(rez);
-        if (!exist) {
-            rez.push_back(random_nr);
-            counter++;
+    while (nr != rez.size()){
+        int ok = 1;
+        int num = (min + (std::rand()%(int)(max - min + 1)));
+        for (int i = 0; i < rez.size(); ++i){
+            if (num == rez[i]){
+                ok = 0;
+                break;
+            }
+        }
+        if (ok == 1){
+            rez.push_back(num);
         }
     }
     return rez;

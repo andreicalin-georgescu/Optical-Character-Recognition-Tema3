@@ -16,14 +16,19 @@ vector<vector<int>> get_random_samples(const vector<vector<int>> &samples,
     // TODO(you)
     // Intoarce un vector de marime num_to_return cu elemente random,
     // diferite din samples
+    int min = 0;
+    int max = samples.size() - 1;
     vector<vector<int>> ret;
-    vector<int> save_index;
-    while (ret.size() != num_to_return) {
-        int index = (std::rand() % (int)(samples.size() + 1));
-        bool exist = std::find(std::begin(save_index), std::end(save_index),
-            index) != std::end(save_index);
-        if (!exist) {
-            save_index.push_back(index);
+    while (num_to_return != ret.size()){
+        int ok = 1;
+        int index = (min + (std::rand()%(int)(max - min + 1)));
+        for (int j = 0; j < ret.size(); ++j){
+            if (samples[index] == ret[j]){
+                ok = 0;
+                break;
+            }
+        }
+        if (ok == 1){
             ret.push_back(samples[index]);
         }
     }
